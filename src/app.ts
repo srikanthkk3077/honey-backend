@@ -1,19 +1,31 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+
+// Import Route Handlers
 import authRoutes from './routes/auth.routes';
-import categoryRoutes from './routes/category.routes';
 import productRoutes from './routes/product.routes';
+import categoryRoutes from './routes/category.routes';
 import orderRoutes from './routes/order.routes';
 import customerRoutes from './routes/customer.routes';
+import videoRoutes from './routes/video.routes';
+import wishlistRoutes from './routes/wishlist.routes';
+import paymentRoutes from './routes/payment.routes';
+import settingsRoutes from './routes/settings.routes';
+import contactRoutes from './routes/contact.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import adminRoutes from './routes/admin.routes';
+
 import { notFound, errorHandler } from './middleware/error.middleware';
 
 const app: Application = express();
 
 // Middlewares
-app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || '*',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,9 +40,12 @@ app.use((req: Request, res: Response, next) => {
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: 'Welcome to Madhuvan Honey API',
+    message: 'Welcome to Madhuvan Honey API Server',
     version: '1.0.0',
-    documentation: '/api/health',
+    documentation: {
+      health: '/api/health',
+      v1: '/api/v1',
+    },
   });
 });
 
@@ -43,12 +58,26 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/customers', customerRoutes);
+// Helper function to mount routes on both /api and /api/v1
+const registerRoutes = (prefix: string) => {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/products`, productRoutes);
+  app.use(`${prefix}/categories`, categoryRoutes);
+  app.use(`${prefix}/orders`, orderRoutes);
+  app.use(`${prefix}/customers`, customerRoutes);
+  app.use(`${prefix}/videos`, videoRoutes);
+  app.use(`${prefix}/wishlist`, wishlistRoutes);
+  app.use(`${prefix}/payment`, paymentRoutes);
+  app.use(`${prefix}/settings`, settingsRoutes);
+  app.use(`${prefix}/contact`, contactRoutes);
+  app.use(`${prefix}/newsletter`, contactRoutes);
+  app.use(`${prefix}/dashboard`, dashboardRoutes);
+  app.use(`${prefix}/admin`, adminRoutes);
+};
+
+// Mount for both standard /api and versioned /api/v1
+registerRoutes('/api');
+registerRoutes('/api/v1');
 
 // Error Handling Middleware
 app.use(notFound);

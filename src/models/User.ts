@@ -27,19 +27,31 @@ const userSchema = new Schema<IUserDocument>(
     phone: {
       type: String,
       trim: true,
+      default: '',
     },
     role: {
       type: String,
       enum: ['customer', 'admin'],
       default: 'customer',
     },
+    avatar: {
+      type: String,
+      default: '',
+    },
     address: {
-      street: { type: String, trim: true },
-      city: { type: String, trim: true },
-      state: { type: String, trim: true },
-      postalCode: { type: String, trim: true },
+      street: { type: String, trim: true, default: '' },
+      city: { type: String, trim: true, default: '' },
+      state: { type: String, trim: true, default: '' },
+      pincode: { type: String, trim: true, default: '' },
+      postalCode: { type: String, trim: true, default: '' },
       country: { type: String, default: 'India', trim: true },
     },
+    wishlist: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,
@@ -47,6 +59,14 @@ const userSchema = new Schema<IUserDocument>(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform(_doc, ret: any) {
+        ret.id = ret._id.toString();
+        delete ret.password;
+        delete ret.__v;
+        return ret;
+      },
+    },
   }
 );
 

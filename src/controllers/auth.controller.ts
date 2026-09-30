@@ -5,13 +5,13 @@ import { sendSuccess, sendError } from '../utils/response';
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone, role, address } = req.body;
 
-    if (!name || !email || !password) {
-      return sendError(res, 'Name, email, and password are required', 400);
+    if (!name || !email) {
+      return sendError(res, 'Name and email are required', 400);
     }
 
-    const result = await authService.register({ name, email, password, phone, role });
+    const result = await authService.register({ name, email, password, phone, role, address });
     return sendSuccess(res, 'User registered successfully', result, 201);
   } catch (error: any) {
     next(error);
@@ -22,12 +22,27 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return sendError(res, 'Email and password are required', 400);
+    if (!email) {
+      return sendError(res, 'Email is required', 400);
     }
 
     const result = await authService.login(email, password);
     return sendSuccess(res, 'Login successful', result, 200);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export const adminLogin = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return sendError(res, 'Email and password are required for admin login', 400);
+    }
+
+    const result = await authService.adminLogin(email, password);
+    return sendSuccess(res, 'Admin authentication successful', result, 200);
   } catch (error: any) {
     next(error);
   }
@@ -59,9 +74,29 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
   }
 };
 
+export const changePassword = async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    if (!req.user?.id) {
+      return sendError(res, 'Unauthorized', 401);
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return sendError(res, 'Current password and new password are required', 400);
+    }
+
+    await authService.changePassword(req.user.id, currentPassword, newPassword);
+    return sendSuccess(res, 'Password changed successfully', null, 200);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export default {
   register,
   login,
+  adminLogin,
   getProfile,
   updateProfile,
+  changePassword,
 };

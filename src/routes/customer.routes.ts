@@ -10,12 +10,12 @@ import { requireAdmin } from '../middleware/admin.middleware';
 
 const router = Router();
 
-// All customer management routes are protected for admin
+// All customer management endpoints require Admin privileges
 router.use(authenticate, requireAdmin);
 
 router.get('/stats', getCustomerStats);
 router.get('/', getAllCustomers);
 router.get('/:id', getCustomerById);
-router.patch('/:id/status', updateCustomerStatus);
+router.put('/:id/status', updateCustomerStatus);
 
 export default router;

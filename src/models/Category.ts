@@ -6,8 +6,8 @@ const categorySchema = new Schema<ICategoryDocument>(
     name: {
       type: String,
       required: [true, 'Category name is required'],
-      trim: true,
       unique: true,
+      trim: true,
       maxlength: [100, 'Category name cannot exceed 100 characters'],
     },
     slug: {
@@ -20,11 +20,16 @@ const categorySchema = new Schema<ICategoryDocument>(
     description: {
       type: String,
       trim: true,
-      maxlength: [500, 'Description cannot exceed 500 characters'],
+      default: '',
     },
     image: {
       type: String,
       default: '',
+    },
+    productCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     isActive: {
       type: Boolean,
@@ -33,6 +38,13 @@ const categorySchema = new Schema<ICategoryDocument>(
   },
   {
     timestamps: true,
+    toJSON: {
+      transform(_doc, ret: any) {
+        ret.id = ret._id.toString();
+        delete ret.__v;
+        return ret;
+      },
+    },
   }
 );
 

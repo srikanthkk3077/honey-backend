@@ -3,9 +3,12 @@ import {
   getProducts,
   getProductById,
   getProductBySlug,
+  getRelatedProducts,
   createProduct,
   updateProduct,
   deleteProduct,
+  addReview,
+  deleteReview,
 } from '../controllers/product.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { requireAdmin } from '../middleware/admin.middleware';
@@ -16,8 +19,11 @@ const router = Router();
 router.get('/', getProducts);
 router.get('/slug/:slug', getProductBySlug);
 router.get('/:id', getProductById);
+router.get('/:id/related', getRelatedProducts);
+router.post('/:id/reviews', addReview);
 
-// Protected Admin routes
+// Protected routes (Admin & Reviewer)
+router.delete('/:id/reviews/:reviewId', authenticate, deleteReview);
 router.post('/', authenticate, requireAdmin, createProduct);
 router.put('/:id', authenticate, requireAdmin, updateProduct);
 router.delete('/:id', authenticate, requireAdmin, deleteProduct);

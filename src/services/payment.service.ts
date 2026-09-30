@@ -1,11 +1,13 @@
 import Order from '../models/Order';
-import { PaymentMethod, PaymentStatus } from '../types';
+import { PaymentMethod } from '../types';
 
 export interface ProcessPaymentInput {
-  orderId: string;
+  orderId?: string;
+  amount?: number;
   paymentMethod: PaymentMethod;
   paymentResult?: {
     id?: string;
+    transactionId?: string;
     status?: string;
     updateTime?: string;
     emailAddress?: string;
@@ -14,15 +16,27 @@ export interface ProcessPaymentInput {
 
 export class PaymentService {
   async processPayment(input: ProcessPaymentInput) {
-    const { orderId, paymentMethod, paymentResult } = input;
+    const { orderId, amount, paymentMethod, paymentResult } = input;
+    const transactionId = paymentResult?.transactionId || paymentResult?.id || `TXN-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
 
-    const order = await Order.findById(orderId);
-    if (!order) {
-      throw new Error('Order not found for payment processing');
+    if (!orderId) {
+      // Standalone payment simulation (for checkout direct integration)
+      return {
+        success: true,
+        transactionId,
+        amount: amount || 0,
+        paymentMethod,
+        message: 'Payment simulation verified successfully',
+      };
     }
 
-    if (order.paymentStatus === 'completed') {
-      throw new Error('Payment has already been completed for this order');
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+
+    if (!order) {
+      throw new Error('Order not found for payment processing');
     }
 
     if (paymentMethod === 'cod') {
@@ -32,19 +46,23 @@ export class PaymentService {
       return {
         success: true,
         orderId: order._id,
+        orderNumber: order.orderNumber,
         paymentStatus: order.paymentStatus,
+        transactionId,
         message: 'Order confirmed with Cash on Delivery',
       };
     }
 
-    // Online payment methods (card, upi, razorpay, stripe)
+    // Online payment methods (upi, card, netbanking, razorpay, stripe)
     order.paymentMethod = paymentMethod;
-    order.paymentStatus = 'completed';
+    order.paymentStatus = 'paid';
     order.paymentResult = {
-      id: paymentResult?.id || `PAY_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      transactionId,
+      id: transactionId,
       status: paymentResult?.status || 'success',
       updateTime: paymentResult?.updateTime || new Date().toISOString(),
-      emailAddress: paymentResult?.emailAddress,
+      emailAddress: paymentResult?.emailAddress || order.customerEmail,
+      method: paymentMethod,
     };
 
     if (order.orderStatus === 'pending') {
@@ -56,20 +74,22 @@ export class PaymentService {
     return {
       success: true,
       orderId: order._id,
+      orderNumber: order.orderNumber,
       paymentStatus: order.paymentStatus,
+      transactionId,
       paymentResult: order.paymentResult,
       message: 'Payment processed successfully',
     };
   }
 
   async refundPayment(orderId: string, reason?: string) {
-    const order = await Order.findById(orderId);
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+
     if (!order) {
       throw new Error('Order not found for refund');
-    }
-
-    if (order.paymentStatus !== 'completed') {
-      throw new Error('Only completed payments can be refunded');
     }
 
     order.paymentStatus = 'refunded';
@@ -84,6 +104,7 @@ export class PaymentService {
     return {
       success: true,
       orderId: order._id,
+      orderNumber: order.orderNumber,
       paymentStatus: order.paymentStatus,
       orderStatus: order.orderStatus,
       message: 'Payment refunded successfully',

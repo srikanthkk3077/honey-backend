@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getAllCategories,
   getCategoryById,
+  getCategoryBySlug,
   createCategory,
   updateCategory,
   deleteCategory,
@@ -13,9 +14,10 @@ const router = Router();
 
 // Public routes
 router.get('/', getAllCategories);
+router.get('/slug/:slug', getCategoryBySlug);
 router.get('/:id', getCategoryById);
 
-// Protected Admin routes
+// Admin routes
 router.post('/', authenticate, requireAdmin, createCategory);
 router.put('/:id', authenticate, requireAdmin, updateCategory);
 router.delete('/:id', authenticate, requireAdmin, deleteCategory);

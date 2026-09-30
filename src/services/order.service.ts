@@ -1,109 +1,214 @@
 import Order from '../models/Order';
 import Product from '../models/Product';
+import Settings from '../models/Settings';
 import { IOrderItem, IShippingAddress, OrderStatus, PaymentMethod } from '../types';
 
 export interface CreateOrderInput {
-  orderItems: Array<{
-    product: string;
-    quantity: number;
-  }>;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   shippingAddress: IShippingAddress;
   paymentMethod: PaymentMethod;
+  items?: Array<{
+    productId?: string;
+    product?: string;
+    name?: string;
+    productName?: string;
+    size?: string;
+    image?: string;
+    price?: number;
+    quantity: number;
+  }>;
+  orderItems?: Array<{
+    productId?: string;
+    product?: string;
+    name?: string;
+    productName?: string;
+    size?: string;
+    image?: string;
+    price?: number;
+    quantity: number;
+  }>;
   notes?: string;
 }
 
 export class OrderService {
-  async createOrder(userId: string, input: CreateOrderInput) {
-    const { orderItems, shippingAddress, paymentMethod, notes } = input;
-
-    if (!orderItems || orderItems.length === 0) {
-      throw new Error('No order items provided');
+  async createOrder(userId: string | null, input: CreateOrderInput) {
+    const rawItems = input.items || input.orderItems || [];
+    if (!rawItems || rawItems.length === 0) {
+      throw new Error('No items provided in order');
     }
+
+    const { shippingAddress, paymentMethod, notes } = input;
+    if (!shippingAddress) {
+      throw new Error('Shipping address is required');
+    }
+
+    const customerName = input.customerName || shippingAddress.fullName;
+    const customerEmail = (input.customerEmail || shippingAddress.email).toLowerCase();
+    const customerPhone = input.customerPhone || shippingAddress.phone;
+
+    // Get store settings for shipping threshold
+    const storeSettings = await Settings.findOne();
+    const freeShippingThreshold = storeSettings?.freeShippingThreshold ?? 999;
+    const standardShippingFee = storeSettings?.shippingFee ?? 79;
 
     const populatedItems: IOrderItem[] = [];
-    let itemsPrice = 0;
+    let subtotal = 0;
+    let discount = 0;
 
-    for (const item of orderItems) {
-      const product = await Product.findById(item.product);
-      if (!product) {
-        throw new Error(`Product not found: ${item.product}`);
+    for (const item of rawItems) {
+      const prodId = item.productId || item.product;
+      const product = prodId ? await Product.findById(prodId) : null;
+
+      let itemPrice = Number(item.price) || 0;
+      let itemName = item.name || item.productName || 'Madhuvan Pure Honey';
+      let itemImage = item.image || '';
+      let itemSize = item.size || '500g';
+
+      if (product) {
+        itemName = product.name;
+        itemImage = product.images[0] || itemImage;
+
+        // Check if size specific pricing exists
+        if (product.sizes && product.sizes.length > 0) {
+          const matchedSize = product.sizes.find((s) => s.size === itemSize) || product.sizes[0];
+          itemPrice = matchedSize.price;
+          if (matchedSize.originalPrice > matchedSize.price) {
+            discount += (matchedSize.originalPrice - matchedSize.price) * item.quantity;
+          }
+
+          // Decrement size stock
+          matchedSize.stock = Math.max(0, matchedSize.stock - item.quantity);
+        } else {
+          itemPrice = product.price;
+          if (product.originalPrice > product.price) {
+            discount += (product.originalPrice - product.price) * item.quantity;
+          }
+        }
+
+        // Decrement overall product stock
+        product.stock = Math.max(0, product.stock - item.quantity);
+        product.stockQuantity = product.stock;
+        await product.save();
       }
-
-      if (!product.isActive) {
-        throw new Error(`Product "${product.name}" is currently unavailable`);
-      }
-
-      if (product.stockQuantity < item.quantity) {
-        throw new Error(`Insufficient stock for "${product.name}". Available: ${product.stockQuantity}`);
-      }
-
-      const activePrice = product.discountPrice && product.discountPrice > 0 ? product.discountPrice : product.price;
 
       populatedItems.push({
-        product: product._id,
-        name: product.name,
+        productId: product?._id || (prodId as any),
+        product: product?._id || (prodId as any),
+        productName: itemName,
+        name: itemName,
+        size: itemSize,
+        image: itemImage,
+        price: itemPrice,
         quantity: item.quantity,
-        price: activePrice,
-        image: product.images[0] || '',
       });
 
-      itemsPrice += activePrice * item.quantity;
-
-      // Decrement stock
-      product.stockQuantity -= item.quantity;
-      await product.save();
+      subtotal += itemPrice * item.quantity;
     }
 
-    // Shipping calculation: Free shipping above 500, else 50
-    const shippingPrice = itemsPrice >= 500 ? 0 : 50;
-    // 5% standard GST on natural honey products
-    const taxPrice = Math.round(itemsPrice * 0.05 * 100) / 100;
-    const totalPrice = Math.round((itemsPrice + shippingPrice + taxPrice) * 100) / 100;
+    const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : standardShippingFee;
+    const taxPrice = Math.round(subtotal * 0.05 * 100) / 100;
+    const total = subtotal + shippingFee;
 
-    const order = await Order.create({
-      user: userId,
-      orderItems: populatedItems,
-      shippingAddress,
-      paymentMethod,
-      paymentStatus: 'pending',
-      itemsPrice,
+    // Generate unique order number
+    let orderNumber = `MDH-${Math.floor(1000 + Math.random() * 9000)}`;
+    let exists = await Order.findOne({ orderNumber });
+    while (exists) {
+      orderNumber = `MDH-${Math.floor(1000 + Math.random() * 9000)}`;
+      exists = await Order.findOne({ orderNumber });
+    }
+
+    const trackingNumber = `MDH-TRK-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const orderData: any = {
+      orderNumber,
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress: {
+        ...shippingAddress,
+        fullName: shippingAddress.fullName || customerName,
+        email: (shippingAddress.email || customerEmail).toLowerCase(),
+        phone: shippingAddress.phone || customerPhone,
+      },
+      items: populatedItems,
+      subtotal,
+      discount,
+      shippingFee,
       taxPrice,
-      shippingPrice,
-      totalPrice,
-      orderStatus: 'pending',
-      notes,
-    });
+      total,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+      orderStatus: 'processing',
+      trackingNumber,
+      trackingCourier: 'Delhivery Express',
+      notes: notes || '',
+    };
+
+    if (userId) {
+      orderData.user = userId;
+    }
+
+    const order = await Order.create(orderData);
 
     return order;
   }
 
   async getOrderById(orderId: string, userId?: string, isAdmin = false) {
-    const order = await Order.findById(orderId)
-      .populate('user', 'name email phone')
-      .populate('orderItems.product', 'name slug images weight');
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId).populate('user', 'name email phone avatar')
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() }).populate('user', 'name email phone avatar');
 
     if (!order) {
       throw new Error('Order not found');
     }
 
-    const orderUserId = (order.user as any)._id
-      ? (order.user as any)._id.toString()
-      : order.user.toString();
+    if (!isAdmin && userId && order.user) {
+      const orderUserId = (order.user as any)._id
+        ? (order.user as any)._id.toString()
+        : order.user.toString();
 
-    if (!isAdmin && userId && orderUserId !== userId) {
-      throw new Error('Unauthorized access to this order');
+      if (orderUserId !== userId) {
+        throw new Error('Unauthorized access to this order');
+      }
+    }
+
+    return order;
+  }
+
+  async trackOrder(query: string) {
+    const clean = query.trim();
+    if (!clean) {
+      throw new Error('Please provide an order number, tracking code, or phone number to track');
+    }
+
+    const order = await Order.findOne({
+      $or: [
+        { orderNumber: new RegExp(`^${clean}$`, 'i') },
+        { trackingNumber: new RegExp(`^${clean}$`, 'i') },
+        { customerPhone: clean },
+      ],
+    }).sort('-createdAt');
+
+    if (!order) {
+      throw new Error(`No consignment found matching "${query}"`);
     }
 
     return order;
   }
 
   async getUserOrders(userId: string, page = 1, limit = 10) {
-    const skip = (Number(page) - 1) * Number(limit);
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(limit));
+    const skip = (pageNum - 1) * limitNum;
+
     const [orders, total] = await Promise.all([
       Order.find({ user: userId })
         .sort('-createdAt')
         .skip(skip)
-        .limit(Number(limit)),
+        .limit(limitNum),
       Order.countDocuments({ user: userId }),
     ]);
 
@@ -111,33 +216,46 @@ export class OrderService {
       orders,
       pagination: {
         total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / Number(limit)),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       },
     };
   }
 
   async getAllOrders(filters: {
+    search?: string;
     status?: OrderStatus;
     paymentStatus?: string;
     page?: number;
     limit?: number;
   }) {
-    const { status, paymentStatus, page = 1, limit = 20 } = filters;
+    const { search, status, paymentStatus, page = 1, limit = 20 } = filters;
     const query: any = {};
 
     if (status) query.orderStatus = status;
     if (paymentStatus) query.paymentStatus = paymentStatus;
 
-    const skip = (Number(page) - 1) * Number(limit);
+    if (search) {
+      query.$or = [
+        { orderNumber: { $regex: search, $options: 'i' } },
+        { customerName: { $regex: search, $options: 'i' } },
+        { customerEmail: { $regex: search, $options: 'i' } },
+        { customerPhone: { $regex: search, $options: 'i' } },
+        { trackingNumber: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Number(limit));
+    const skip = (pageNum - 1) * limitNum;
 
     const [orders, total] = await Promise.all([
       Order.find(query)
-        .populate('user', 'name email')
+        .populate('user', 'name email phone')
         .sort('-createdAt')
         .skip(skip)
-        .limit(Number(limit)),
+        .limit(limitNum),
       Order.countDocuments(query),
     ]);
 
@@ -145,32 +263,43 @@ export class OrderService {
       orders,
       pagination: {
         total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / Number(limit)),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       },
     };
   }
 
-  async updateOrderStatus(orderId: string, orderStatus: OrderStatus) {
-    const order = await Order.findById(orderId);
+  async updateOrderStatus(orderId: string, orderStatus: OrderStatus, notes?: string) {
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+
     if (!order) {
       throw new Error('Order not found');
     }
 
     order.orderStatus = orderStatus;
+    if (notes) {
+      order.notes = order.notes ? `${order.notes} | ${notes}` : notes;
+    }
+
     if (orderStatus === 'delivered') {
       order.deliveredAt = new Date();
       if (order.paymentMethod === 'cod') {
-        order.paymentStatus = 'completed';
+        order.paymentStatus = 'paid';
       }
     } else if (orderStatus === 'cancelled') {
       order.cancelledAt = new Date();
-      // Restore stock if cancelled
-      for (const item of order.orderItems) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stockQuantity: item.quantity },
-        });
+      // Restore inventory
+      for (const item of order.items) {
+        if (item.productId || item.product) {
+          const prodId = item.productId || item.product;
+          await Product.findByIdAndUpdate(prodId, {
+            $inc: { stock: item.quantity, stockQuantity: item.quantity },
+          });
+        }
       }
     }
 
@@ -178,31 +307,62 @@ export class OrderService {
     return order;
   }
 
-  async cancelOrder(orderId: string, userId: string, isAdmin = false, reason?: string) {
-    const order = await Order.findById(orderId);
+  async updateOrderTracking(orderId: string, trackingNumber: string, trackingCourier?: string) {
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+
     if (!order) {
       throw new Error('Order not found');
     }
 
-    if (!isAdmin && order.user.toString() !== userId) {
+    order.trackingNumber = trackingNumber.trim();
+    if (trackingCourier) {
+      order.trackingCourier = trackingCourier.trim();
+    }
+    if (order.orderStatus === 'pending' || order.orderStatus === 'processing') {
+      order.orderStatus = 'shipped';
+    }
+
+    await order.save();
+    return order;
+  }
+
+  async cancelOrder(orderId: string, userId?: string, isAdmin = false, reason?: string) {
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    if (!isAdmin && userId && order.user && order.user.toString() !== userId) {
       throw new Error('Unauthorized to cancel this order');
     }
 
-    if (order.orderStatus === 'delivered' || order.orderStatus === 'cancelled') {
-      throw new Error(`Cannot cancel an order that is already ${order.orderStatus}`);
+    if (order.orderStatus === 'delivered') {
+      throw new Error('Delivered orders cannot be cancelled');
+    }
+
+    if (order.orderStatus === 'cancelled') {
+      throw new Error('Order is already cancelled');
     }
 
     order.orderStatus = 'cancelled';
     order.cancelledAt = new Date();
-    if (reason) {
-      order.notes = order.notes ? `${order.notes} | Cancellation Reason: ${reason}` : `Cancellation: ${reason}`;
-    }
+    order.cancellationReason = reason || 'Customer requested cancellation';
 
-    // Restore stock
-    for (const item of order.orderItems) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stockQuantity: item.quantity },
-      });
+    // Restore inventory
+    for (const item of order.items) {
+      if (item.productId || item.product) {
+        const prodId = item.productId || item.product;
+        await Product.findByIdAndUpdate(prodId, {
+          $inc: { stock: item.quantity, stockQuantity: item.quantity },
+        });
+      }
     }
 
     await order.save();
