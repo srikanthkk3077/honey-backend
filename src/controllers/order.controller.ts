@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+﻿import { Response, NextFunction } from 'express';
 import orderService from '../services/order.service';
 import paymentService from '../services/payment.service';
 import { AuthRequest } from '../types';
@@ -6,7 +6,18 @@ import { sendSuccess, sendError } from '../utils/response';
 
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
   try {
-    const { shippingAddress, paymentMethod, items, orderItems, notes, customerName, customerEmail, customerPhone } = req.body;
+    const {
+      shippingAddress,
+      paymentMethod,
+      items,
+      orderItems,
+      notes,
+      customerName,
+      customerEmail,
+      customerPhone,
+      utrNumber,
+      paymentScreenshot,
+    } = req.body;
 
     const rawItems = items || orderItems;
     if (!rawItems || !rawItems.length || !shippingAddress || !paymentMethod) {
@@ -23,6 +34,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       paymentMethod,
       items: rawItems,
       notes,
+      utrNumber,
+      paymentScreenshot,
     });
 
     return sendSuccess(res, 'Order placed successfully', order, 201);
@@ -86,7 +99,7 @@ export const getAllOrders = async (req: AuthRequest, res: Response, next: NextFu
       status: status as any,
       paymentStatus: paymentStatus as string,
       page: page ? Number(page) : 1,
-      limit: limit ? Number(limit) : 20,
+      limit: limit ? Number(limit) : 200,
     });
 
     return sendSuccess(res, 'All orders retrieved successfully', result);
@@ -164,6 +177,27 @@ export const processOrderPayment = async (req: AuthRequest, res: Response, next:
   }
 };
 
+export const verifyPayment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const id = req.params.id as string;
+    const order = await orderService.verifyPayment(id);
+    return sendSuccess(res, 'Payment verified successfully', order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const rejectPayment = async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const id = req.params.id as string;
+    const { reason } = req.body;
+    const order = await orderService.rejectPayment(id, reason);
+    return sendSuccess(res, 'Payment rejected', order);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createOrder,
   getMyOrders,
@@ -174,4 +208,6 @@ export default {
   updateOrderTracking,
   cancelOrder,
   processOrderPayment,
+  verifyPayment,
+  rejectPayment,
 };

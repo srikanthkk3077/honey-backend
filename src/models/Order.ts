@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+﻿import { Schema, model } from 'mongoose';
 import { IOrderDocument } from '../types';
 
 const orderItemSchema = new Schema(
@@ -133,8 +133,25 @@ const orderSchema = new Schema<IOrderDocument>(
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'paid', 'completed', 'failed', 'refunded'],
+      enum: ['pending', 'paid', 'completed', 'failed', 'refunded', 'verification_pending', 'rejected'],
       default: 'pending',
+    },
+    utrNumber: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    paymentScreenshot: {
+      type: String,
+      default: '',
+    },
+    paymentVerifiedAt: {
+      type: Date,
+    },
+    paymentRejectedReason: {
+      type: String,
+      trim: true,
+      default: '',
     },
     paymentResult: {
       transactionId: { type: String, default: '' },

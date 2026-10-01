@@ -166,15 +166,22 @@ export class ProductService {
         .replace(/(^-|-$)+/g, '');
     }
 
-    // Resolve category if needed
+    // Resolve category to ObjectId if string
     if (data.category && typeof data.category === 'string' && !data.category.match(/^[0-9a-fA-F]{24}$/)) {
-      const cat = await Category.findOne({
+      let cat = await Category.findOne({
         $or: [{ slug: data.category.toLowerCase() }, { name: data.category }],
       });
-      if (cat) {
-        data.category = cat._id;
-        data.categorySlug = cat.slug;
+      if (!cat) {
+        cat = await Category.findOne();
+        if (!cat) {
+          cat = await Category.create({
+            name: data.category,
+            slug: data.category.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          });
+        }
       }
+      data.category = cat._id;
+      data.categorySlug = cat.slug;
     }
 
     // Check slug collision
@@ -201,18 +208,40 @@ export class ProductService {
         .replace(/(^-|-$)+/g, '');
     }
 
-    const oldProduct = await Product.findById(id);
-    if (!oldProduct) {
-      throw new Error('Product not found to update');
+    // Resolve category to ObjectId if provided as string
+    if (data.category && typeof data.category === 'string' && !data.category.match(/^[0-9a-fA-F]{24}$/)) {
+      const cat = await Category.findOne({
+        $or: [{ slug: data.category.toLowerCase() }, { name: data.category }],
+      });
+      if (cat) {
+        data.category = cat._id;
+        data.categorySlug = cat.slug;
+      } else {
+        delete data.category;
+      }
     }
 
-    const updated = await Product.findByIdAndUpdate(id, data, {
+    let oldProduct: any = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      oldProduct = await Product.findById(id);
+    }
+    if (!oldProduct) {
+      oldProduct = await Product.findOne({ slug: id });
+    }
+    if (!oldProduct) {
+      // If updating a product that was created client-side only, create it in MongoDB
+      const created = await this.createProduct({ ...data, name: data.name || 'Madhuvan Pure Honey' });
+      return created;
+    }
+
+    const realId = oldProduct._id;
+    const updated = await Product.findByIdAndUpdate(realId, data, {
       new: true,
       runValidators: true,
     }).populate('category', 'name slug image');
 
     // If category changed, update product counts
-    if (data.category && oldProduct.category.toString() !== data.category.toString()) {
+    if (data.category && oldProduct.category && oldProduct.category.toString() !== data.category.toString()) {
       await Category.findByIdAndUpdate(oldProduct.category, { $inc: { productCount: -1 } });
       await Category.findByIdAndUpdate(data.category, { $inc: { productCount: 1 } });
     }
@@ -221,9 +250,16 @@ export class ProductService {
   }
 
   async deleteProduct(id: string) {
-    const product = await Product.findByIdAndDelete(id);
+    let product: any = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findByIdAndDelete(id);
+    }
     if (!product) {
-      throw new Error('Product not found to delete');
+      product = await Product.findOneAndDelete({ slug: id });
+    }
+    if (!product) {
+      // If product ID only existed client-side, consider it deleted
+      return { id, message: 'Deleted locally' };
     }
 
     if (product.category) {

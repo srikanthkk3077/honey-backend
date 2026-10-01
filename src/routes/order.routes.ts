@@ -9,6 +9,8 @@ import {
   updateOrderTracking,
   cancelOrder,
   processOrderPayment,
+  verifyPayment,
+  rejectPayment,
 } from '../controllers/order.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { requireAdmin } from '../middleware/admin.middleware';
@@ -43,5 +45,7 @@ router.get('/admin/all', authenticate, requireAdmin, getAllOrders);
 router.get('/', authenticate, requireAdmin, getAllOrders);
 router.put('/:id/status', authenticate, requireAdmin, updateOrderStatus);
 router.put('/:id/tracking', authenticate, requireAdmin, updateOrderTracking);
+router.put('/:id/verify-payment', authenticate, requireAdmin, verifyPayment);
+router.put('/:id/reject-payment', authenticate, requireAdmin, rejectPayment);
 
 export default router;

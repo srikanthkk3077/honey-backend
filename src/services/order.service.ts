@@ -30,6 +30,8 @@ export interface CreateOrderInput {
     quantity: number;
   }>;
   notes?: string;
+  utrNumber?: string;
+  paymentScreenshot?: string;
 }
 
 export class OrderService {
@@ -39,7 +41,7 @@ export class OrderService {
       throw new Error('No items provided in order');
     }
 
-    const { shippingAddress, paymentMethod, notes } = input;
+    const { shippingAddress, paymentMethod, notes, utrNumber, paymentScreenshot } = input;
     if (!shippingAddress) {
       throw new Error('Shipping address is required');
     }
@@ -139,7 +141,9 @@ export class OrderService {
       taxPrice,
       total,
       paymentMethod,
-      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'paid',
+      paymentStatus: paymentMethod === 'cod' ? 'pending' : 'verification_pending',
+      utrNumber: utrNumber || '',
+      paymentScreenshot: paymentScreenshot || '',
       orderStatus: 'processing',
       trackingNumber,
       trackingCourier: 'Delhivery Express',
@@ -365,6 +369,30 @@ export class OrderService {
       }
     }
 
+    await order.save();
+    return order;
+  }
+
+  async verifyPayment(orderId: string) {
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+    if (!order) { throw new Error('Order not found'); }
+    (order as any).paymentStatus = 'paid';
+    (order as any).paymentVerifiedAt = new Date();
+    await order.save();
+    return order;
+  }
+
+  async rejectPayment(orderId: string, reason?: string) {
+    const isObjectId = orderId.match(/^[0-9a-fA-F]{24}$/);
+    const order = isObjectId
+      ? await Order.findById(orderId)
+      : await Order.findOne({ orderNumber: orderId.toUpperCase() });
+    if (!order) { throw new Error('Order not found'); }
+    (order as any).paymentStatus = 'rejected';
+    (order as any).paymentRejectedReason = reason || 'Payment not verified';
     await order.save();
     return order;
   }

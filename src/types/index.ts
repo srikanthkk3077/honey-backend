@@ -1,4 +1,4 @@
-import { Request } from 'express';
+﻿import { Request } from 'express';
 import { Document, Types } from 'mongoose';
 
 export type UserRole = 'customer' | 'admin';
@@ -153,7 +153,7 @@ export interface IOrderItem {
 }
 
 export type PaymentMethod = 'upi' | 'card' | 'cod' | 'netbanking' | 'razorpay' | 'stripe';
-export type PaymentStatus = 'pending' | 'paid' | 'completed' | 'failed' | 'refunded';
+export type PaymentStatus = 'pending' | 'paid' | 'completed' | 'failed' | 'refunded' | 'verification_pending' | 'rejected';
 export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface IPaymentResult {
@@ -180,6 +180,10 @@ export interface IOrder {
   total: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  utrNumber?: string;
+  paymentScreenshot?: string;
+  paymentVerifiedAt?: Date;
+  paymentRejectedReason?: string;
   paymentResult?: IPaymentResult;
   orderStatus: OrderStatus;
   trackingNumber?: string;
