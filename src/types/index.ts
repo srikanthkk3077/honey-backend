@@ -1,6 +1,7 @@
-﻿import { Request } from 'express';
-import { Document, Types } from 'mongoose';
+﻿import { Document, Types } from 'mongoose';
+import { Request } from 'express';
 
+// User & Auth Types
 export type UserRole = 'customer' | 'admin';
 
 export interface IUserAddress {
@@ -8,7 +9,7 @@ export interface IUserAddress {
   city?: string;
   state?: string;
   pincode?: string;
-  postalCode?: string;
+  postalCode?: string; // backwards compatibility
   country?: string;
 }
 
@@ -21,6 +22,10 @@ export interface IUser {
   avatar?: string;
   address?: IUserAddress;
   wishlist?: Types.ObjectId[];
+  resetPasswordToken?: string;
+  resetPasswordExpire?: Date;
+  resetPasswordOtp?: string;
+  resetPasswordOtpExpire?: Date;
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -343,7 +348,6 @@ export interface ApiResponse<T = any> {
   data?: T;
   error?: any;
 }
-
 
 export interface ISlider {
   title: string;

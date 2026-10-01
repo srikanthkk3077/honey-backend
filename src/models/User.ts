@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+﻿import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { IUserDocument } from '../types';
 
@@ -52,6 +52,22 @@ const userSchema = new Schema<IUserDocument>(
         ref: 'Product',
       },
     ],
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpire: {
+      type: Date,
+      select: false,
+    },
+    resetPasswordOtp: {
+      type: String,
+      select: false,
+    },
+    resetPasswordOtpExpire: {
+      type: Date,
+      select: false,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -63,6 +79,10 @@ const userSchema = new Schema<IUserDocument>(
       transform(_doc, ret: any) {
         ret.id = ret._id.toString();
         delete ret.password;
+        delete ret.resetPasswordToken;
+        delete ret.resetPasswordExpire;
+        delete ret.resetPasswordOtp;
+        delete ret.resetPasswordOtpExpire;
         delete ret.__v;
         return ret;
       },

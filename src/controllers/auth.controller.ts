@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+﻿import { Request, Response, NextFunction } from 'express';
 import authService from '../services/auth.service';
 import { AuthRequest } from '../types';
 import { sendSuccess, sendError } from '../utils/response';
@@ -92,6 +92,66 @@ export const changePassword = async (req: AuthRequest, res: Response, next: Next
   }
 };
 
+/**
+ * POST /api/auth/forgot-password
+ */
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return sendError(res, 'Please provide a valid registered email address', 400);
+    }
+
+    const result = await authService.forgotPassword(email);
+    return sendSuccess(res, result.message, result, 200);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/auth/verify-otp
+ */
+export const verifyOtp = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return sendError(res, 'Email address and 6-digit OTP code are required', 400);
+    }
+
+    const result = await authService.verifyResetOtp(email, otp);
+    return sendSuccess(res, result.message, result, 200);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/auth/reset-password
+ */
+export const resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { email, otp, resetToken, token, newPassword, password } = req.body;
+    const finalPassword = newPassword || password;
+    const finalKey = otp || resetToken || token;
+
+    if (!email) {
+      return sendError(res, 'Email address is required', 400);
+    }
+    if (!finalKey) {
+      return sendError(res, 'Verification code or reset token is required', 400);
+    }
+    if (!finalPassword) {
+      return sendError(res, 'Please enter a new password', 400);
+    }
+
+    const result = await authService.resetPassword(email, finalKey, finalPassword);
+    return sendSuccess(res, result.message, result, 200);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export default {
   register,
   login,
@@ -99,4 +159,7 @@ export default {
   getProfile,
   updateProfile,
   changePassword,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 };
