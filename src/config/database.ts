@@ -1,4 +1,12 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Fix for Windows / ISP DNS querySrv EBADRESP error
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // Ignore fallback
+}
 
 export const connectDatabase = async (): Promise<void> => {
   try {

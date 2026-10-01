@@ -204,6 +204,7 @@ export interface IVideoItem {
   description: string;
   videoUrl: string;
   thumbnailUrl: string;
+  videoType?: 'regular' | 'short' | 'reel';
   category: VideoCategory;
   duration: string;
   taggedProductId?: string;
@@ -221,7 +222,24 @@ export interface IVideoItemDocument extends IVideoItem, Document {
 }
 
 // Store Settings Types matching madhuvan_honey frontend
+
+export interface IPaymentConfig {
+  upiId?: string;
+  upiQrCode?: string;
+  accountHolderName?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  bankName?: string;
+  branchName?: string;
+  accountType?: string;
+  paymentInstructions?: string;
+  isUpiActive?: boolean;
+  isBankTransferActive?: boolean;
+  isCodActive?: boolean;
+}
+
 export interface IStoreSettings {
+  paymentConfig?: IPaymentConfig;
   storeName: string;
   brandTagline: string;
   phone: string;
@@ -320,4 +338,26 @@ export interface ApiResponse<T = any> {
   message: string;
   data?: T;
   error?: any;
+}
+
+
+export interface ISlider {
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  imageUrl: string;
+  videoUrl?: string;
+  mediaType: 'image' | 'video';
+  linkUrl: string;
+  ctaText?: string;
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
+  order: number;
+  isActive: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ISliderDocument extends ISlider, Document {
+  _id: Types.ObjectId;
 }

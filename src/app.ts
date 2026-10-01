@@ -8,6 +8,7 @@ import categoryRoutes from './routes/category.routes';
 import orderRoutes from './routes/order.routes';
 import customerRoutes from './routes/customer.routes';
 import videoRoutes from './routes/video.routes';
+import sliderRoutes from './routes/slider.routes';
 import wishlistRoutes from './routes/wishlist.routes';
 import paymentRoutes from './routes/payment.routes';
 import settingsRoutes from './routes/settings.routes';
@@ -66,6 +67,7 @@ const registerRoutes = (prefix: string) => {
   app.use(`${prefix}/orders`, orderRoutes);
   app.use(`${prefix}/customers`, customerRoutes);
   app.use(`${prefix}/videos`, videoRoutes);
+  app.use(`${prefix}/sliders`, sliderRoutes);
   app.use(`${prefix}/wishlist`, wishlistRoutes);
   app.use(`${prefix}/payment`, paymentRoutes);
   app.use(`${prefix}/settings`, settingsRoutes);

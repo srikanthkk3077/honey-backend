@@ -19,6 +19,11 @@ const videoSchema = new Schema<IVideoItemDocument>(
       required: [true, 'Video URL is required'],
       trim: true,
     },
+    videoType: {
+      type: String,
+      enum: ['regular', 'short', 'reel'],
+      default: 'short',
+    },
     thumbnailUrl: {
       type: String,
       required: [true, 'Thumbnail URL is required'],
