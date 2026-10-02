@@ -61,7 +61,14 @@ export class OrderService {
 
     for (const item of rawItems) {
       const prodId = item.productId || item.product;
-      const product = prodId ? await Product.findById(prodId) : null;
+      const isObjectId = typeof prodId === 'string' && /^[0-9a-fA-F]{24}$/.test(prodId);
+      let product = isObjectId ? await Product.findById(prodId) : null;
+      if (!product && item.slug) {
+        product = await Product.findOne({ slug: item.slug });
+      }
+      if (!product && (item.name || item.productName)) {
+        product = await Product.findOne({ name: item.name || item.productName });
+      }
 
       let itemPrice = Number(item.price) || 0;
       let itemName = item.name || item.productName || 'Madhuvan Pure Honey';
