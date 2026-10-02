@@ -32,16 +32,20 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  if (file.mimetype.startsWith('image/') || /\.(jpe?g|png|webp|gif|svg|avif|bmp)$/i.test(file.originalname)) {
+  if (
+    file.mimetype.startsWith('image/') ||
+    file.mimetype.startsWith('video/') ||
+    /\.(jpe?g|png|webp|gif|svg|avif|bmp|mp4|webm|ogg|mov|m4v)$/i.test(file.originalname)
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files (JPEG, PNG, WEBP, GIF, SVG, AVIF) are allowed!'));
+    cb(new Error('Only image and video files (JPEG, PNG, WEBP, MP4, WebM, MOV) are allowed!'));
   }
 };
 
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB limit
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB limit
   fileFilter,
 });
 
@@ -57,6 +61,8 @@ router.post(
   '/',
   upload.fields([
     { name: 'image', maxCount: 10 },
+    { name: 'video', maxCount: 5 },
+    { name: 'videos', maxCount: 5 },
     { name: 'images', maxCount: 10 },
     { name: 'file', maxCount: 10 },
     { name: 'files', maxCount: 10 },

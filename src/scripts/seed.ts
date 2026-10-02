@@ -4,9 +4,13 @@ dotenv.config();
 import mongoose from 'mongoose';
 import dns from 'dns';
 
+// Fix for Windows / ISP DNS querySrv EBADRESP error
 try {
   dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch {}
+} catch {
+  // Ignore fallback
+}
+
 import User from '../models/User';
 import Category from '../models/Category';
 import Product from '../models/Product';
