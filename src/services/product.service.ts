@@ -288,6 +288,10 @@ export class ProductService {
       comment: reviewData.comment,
       date: new Date().toISOString().split('T')[0],
       verified: reviewData.verified ?? false,
+      showOnHome: (reviewData as any).showOnHome ?? false,
+      userRole: (reviewData as any).userRole || 'Verified Patron',
+      location: (reviewData as any).location || 'Verified Buyer',
+      avatar: (reviewData as any).avatar || '',
     };
 
     product.reviews.push(newReview as any);
@@ -322,7 +326,115 @@ export class ProductService {
     await product.save();
     return product;
   }
+
+  async getAllReviews() {
+    const products = await Product.find({}, 'name slug images reviews').lean();
+    const allReviews: any[] = [];
+
+    for (const prod of products) {
+      if (prod.reviews && Array.isArray(prod.reviews)) {
+        for (const r of prod.reviews) {
+          allReviews.push({
+            id: (r as any)._id?.toString() || (r as any).id,
+            reviewId: (r as any)._id?.toString() || (r as any).id,
+            productId: (prod as any)._id.toString(),
+            productName: prod.name,
+            productSlug: prod.slug,
+            productImage: prod.images?.[0] || '',
+            userName: (r as any).userName,
+            rating: (r as any).rating,
+            comment: (r as any).comment,
+            date: (r as any).date,
+            verified: (r as any).verified,
+            showOnHome: !!(r as any).showOnHome,
+            userRole: (r as any).userRole || 'Verified Patron',
+            location: (r as any).location || 'Verified Buyer',
+            avatar: (r as any).avatar || '',
+          });
+        }
+      }
+    }
+
+    allReviews.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+    return allReviews;
+  }
+
+  async getHomeReviews() {
+    const products = await Product.find({ 'reviews.showOnHome': true }, 'name slug images reviews').lean();
+    const homeReviews: any[] = [];
+
+    for (const prod of products) {
+      if (prod.reviews && Array.isArray(prod.reviews)) {
+        for (const r of prod.reviews) {
+          if ((r as any).showOnHome) {
+            homeReviews.push({
+              id: (r as any)._id?.toString() || (r as any).id,
+              name: (r as any).userName,
+              role: (r as any).userRole || 'Verified Patron',
+              location: (r as any).location || 'Verified Buyer',
+              avatar: (r as any).avatar || (prod.images?.[0] || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80'),
+              comment: (r as any).comment,
+              rating: (r as any).rating,
+              productMentioned: prod.name,
+              productSlug: prod.slug,
+              productId: (prod as any)._id.toString(),
+              date: (r as any).date,
+            });
+          }
+        }
+      }
+    }
+
+    // Sort newest reviews first so admin-handled and latest reviews show front and center
+    homeReviews.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+    return homeReviews;
+  }
+
+  async toggleReviewHome(productId: string, reviewId: string, showOnHome?: boolean) {
+    const product = await Product.findById(productId);
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    const review = (product.reviews as any).find(
+      (r: any) => r._id?.toString() === reviewId || r.id === reviewId
+    );
+
+    if (!review) {
+      throw new Error('Review not found');
+    }
+
+    if (typeof showOnHome === 'boolean') {
+      review.showOnHome = showOnHome;
+    } else {
+      review.showOnHome = !review.showOnHome;
+    }
+
+    product.markModified('reviews');
+    await product.save();
+
+    // Atomic update in MongoDB to ensure 100% persistence
+    try {
+      const reviewObjId = (review as any)._id;
+      if (reviewObjId) {
+        await Product.updateOne(
+          { _id: product._id, 'reviews._id': reviewObjId },
+          { $set: { 'reviews.$.showOnHome': review.showOnHome } }
+        );
+      }
+    } catch (err) {
+      console.error('Atomic update error:', err);
+    }
+    return {
+      reviewId,
+      productId,
+      showOnHome: review.showOnHome,
+      review,
+    };
+  }
+
 }
+
 
 export const productService = new ProductService();
 export default productService;

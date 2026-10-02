@@ -20,6 +20,10 @@ const productReviewSchema = new Schema(
     comment: { type: String, required: true, trim: true },
     date: { type: String, default: () => new Date().toISOString().split('T')[0] },
     verified: { type: Boolean, default: false },
+    showOnHome: { type: Boolean, default: false },
+    userRole: { type: String, default: 'Verified Patron' },
+    location: { type: String, default: 'Verified Buyer' },
+    avatar: { type: String, default: '' },
   },
   {
     timestamps: true,

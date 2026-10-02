@@ -81,6 +81,10 @@ export interface IProductReview {
   comment: string;
   date: string;
   verified: boolean;
+  showOnHome?: boolean;
+  userRole?: string;
+  location?: string;
+  avatar?: string;
 }
 
 export interface INutritionFacts {

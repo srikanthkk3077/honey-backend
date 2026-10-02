@@ -152,6 +152,36 @@ export const deleteReview = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
+
+export const getAllReviews = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const reviews = await productService.getAllReviews();
+    return sendSuccess(res, 'Reviews fetched successfully', reviews);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getHomeReviews = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const reviews = await productService.getHomeReviews();
+    return sendSuccess(res, 'Home reviews fetched successfully', reviews);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleReviewHome = async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { id, reviewId } = req.params;
+    const { showOnHome } = req.body;
+    const result = await productService.toggleReviewHome(id as string, reviewId as string, showOnHome);
+    return sendSuccess(res, 'Review home visibility updated', result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   getProducts,
   getProductById,
@@ -162,4 +192,7 @@ export default {
   deleteProduct,
   addReview,
   deleteReview,
+  getAllReviews,
+  getHomeReviews,
+  toggleReviewHome,
 };
