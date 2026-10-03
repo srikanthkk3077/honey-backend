@@ -1,62 +1,51 @@
-﻿import { Router, Request, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
+import {
+  uploadBufferToCloudinary,
+  uploadBase64ToCloudinary,
+  CloudinaryUploadResult,
+} from '../config/cloudinary';
 
 const router = Router();
 
-// Ensure uploads directory exists
-const uploadDir = path.join(process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer disk storage setup
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.jpg';
-    const cleanName = path
-      .basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9]/g, '-')
-      .slice(0, 30);
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    cb(null, `${cleanName}-${uniqueSuffix}${ext}`);
-  },
-});
-
-const fileFilter = (
-  _req: Request,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback
-) => {
-  if (
-    file.mimetype.startsWith('image/') ||
-    file.mimetype.startsWith('video/') ||
-    /\.(jpe?g|png|webp|gif|svg|avif|bmp|mp4|webm|ogg|mov|m4v)$/i.test(file.originalname)
-  ) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image and video files (JPEG, PNG, WEBP, MP4, WebM, MOV) are allowed!'));
-  }
-};
-
+// Store files in memory buffer for fast direct streaming to Cloudinary
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB limit
-  fileFilter,
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    if (
+      file.mimetype.startsWith('image/') ||
+      file.mimetype.startsWith('video/') ||
+      /\.(jpe?g|png|webp|gif|svg|avif|bmp|mp4|webm|ogg|mov|m4v)$/i.test(file.originalname)
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image and video files (JPEG, PNG, WEBP, MP4, WebM, MOV) are allowed!'));
+    }
+  },
 });
 
-// Helper to format full public URL
-const getFileUrl = (req: Request, filename: string): string => {
-  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-  const host = req.get('host') || 'localhost:5000';
-  return `${protocol}://${host}/uploads/${filename}`;
+// Helper to determine media type and target Cloudinary folder
+const getMediaDetails = (file: Express.Multer.File) => {
+  const isVideo =
+    file.mimetype.startsWith('video/') ||
+    /\.(mp4|webm|ogg|mov|m4v)$/i.test(file.originalname);
+
+  const resourceType: 'image' | 'video' = isVideo ? 'video' : 'image';
+  const folder = isVideo ? 'madhuvan_honey/videos' : 'madhuvan_honey/media';
+
+  const ext = path.extname(file.originalname) || '';
+  const cleanName = path
+    .basename(file.originalname, ext)
+    .replace(/[^a-zA-Z0-9]/g, '-')
+    .slice(0, 30);
+  const fileName = `${cleanName}-${Date.now()}`;
+
+  return { isVideo, resourceType, folder, fileName };
 };
 
-// 1. Single or Multiple files via flexible field name (file, files, image, images)
+// 1. Single or Multiple files via flexible field names (image, images, video, videos, file, files)
 router.post(
   '/',
   upload.fields([
@@ -83,36 +72,40 @@ router.post(
       // Handle base64 fallback if sent via JSON body instead of multipart
       if (uploadedFiles.length === 0 && req.body) {
         const { image, images, base64 } = req.body;
-        const b64List = Array.isArray(images) ? images : image ? [image] : base64 ? [base64] : [];
+        const b64List: string[] = Array.isArray(images)
+          ? images
+          : image
+          ? [image]
+          : base64
+          ? [base64]
+          : [];
 
         if (b64List.length > 0) {
-          const generatedUrls: string[] = [];
+          const results: CloudinaryUploadResult[] = [];
           for (let i = 0; i < b64List.length; i++) {
             const item = b64List[i];
-            if (typeof item === 'string' && item.startsWith('data:image/')) {
-              const matches = item.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
-              if (matches) {
-                const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-                const data = matches[2];
-                const filename = `upload-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
-                const filePath = path.join(uploadDir, filename);
-                fs.writeFileSync(filePath, Buffer.from(data, 'base64'));
-                generatedUrls.push(getFileUrl(req, filename));
-              }
-            } else if (typeof item === 'string' && (item.startsWith('http://') || item.startsWith('https://'))) {
-              generatedUrls.push(item);
+            if (typeof item === 'string' && (item.startsWith('data:') || item.startsWith('http'))) {
+              const isVideo = item.startsWith('data:video/');
+              const res = await uploadBase64ToCloudinary(
+                item,
+                isVideo ? 'madhuvan_honey/videos' : 'madhuvan_honey/media',
+                isVideo ? 'video' : 'image'
+              );
+              results.push(res);
             }
           }
 
-          if (generatedUrls.length > 0) {
+          if (results.length > 0) {
+            const urls = results.map((r) => r.optimizedUrl);
             res.status(200).json({
               success: true,
-              message: 'Images uploaded successfully',
-              url: generatedUrls[0],
-              urls: generatedUrls,
+              message: 'Media uploaded and optimized successfully via Cloudinary',
+              url: urls[0],
+              urls,
               data: {
-                urls: generatedUrls,
-                primaryUrl: generatedUrls[0],
+                urls,
+                primaryUrl: urls[0],
+                files: results,
               },
             });
             return;
@@ -123,35 +116,55 @@ router.post(
       if (uploadedFiles.length === 0) {
         res.status(400).json({
           success: false,
-          message: 'No image file uploaded. Please provide an image file.',
+          message: 'No image or video file uploaded. Please provide a file.',
         });
         return;
       }
 
-      const urls = uploadedFiles.map((file) => getFileUrl(req, file.filename));
+      // Parallel upload to Cloudinary directly from memory
+      const uploadResults = await Promise.all(
+        uploadedFiles.map(async (file) => {
+          const { resourceType, folder, fileName } = getMediaDetails(file);
+          const result = await uploadBufferToCloudinary(
+            file.buffer,
+            folder,
+            resourceType,
+            fileName
+          );
+          return {
+            filename: file.originalname,
+            originalName: file.originalname,
+            size: file.size,
+            mimetype: file.mimetype,
+            url: result.optimizedUrl, // Ultra-fast CDN URL with f_auto,q_auto
+            secureUrl: result.secureUrl,
+            optimizedUrl: result.optimizedUrl,
+            thumbnailUrl: result.thumbnailUrl,
+            posterUrl: result.posterUrl,
+            publicId: result.publicId,
+            resourceType: result.resourceType,
+          };
+        })
+      );
+
+      const urls = uploadResults.map((f) => f.optimizedUrl);
 
       res.status(200).json({
         success: true,
-        message: `${uploadedFiles.length} image(s) uploaded successfully`,
+        message: `${uploadResults.length} file(s) uploaded and optimized successfully`,
         url: urls[0],
         urls,
         data: {
           urls,
           primaryUrl: urls[0],
-          files: uploadedFiles.map((f, i) => ({
-            filename: f.filename,
-            originalName: f.originalname,
-            size: f.size,
-            mimetype: f.mimetype,
-            url: urls[i],
-          })),
+          files: uploadResults,
         },
       });
     } catch (error: any) {
-      console.error('[Upload Error]:', error);
+      console.error('[Cloudinary Upload Error]:', error);
       res.status(500).json({
         success: false,
-        message: error.message || 'Failed to upload image',
+        message: error.message || 'Failed to upload media to Cloudinary',
       });
     }
   }
@@ -160,50 +173,48 @@ router.post(
 // 2. Base64 Dedicated Endpoint
 router.post('/base64', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { image, images, filename: customName } = req.body;
+    const { image, images } = req.body;
     const b64List: string[] = Array.isArray(images) ? images : image ? [image] : [];
 
     if (b64List.length === 0) {
       res.status(400).json({
         success: false,
-        message: 'No base64 image data provided',
+        message: 'No base64 data provided',
       });
       return;
     }
 
-    const generatedUrls: string[] = [];
-    for (let i = 0; i < b64List.length; i++) {
-      const item = b64List[i];
-      if (typeof item === 'string' && item.startsWith('data:image/')) {
-        const matches = item.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
-        if (matches) {
-          const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-          const data = matches[2];
-          const filename = `${customName ? customName.replace(/[^a-zA-Z0-9]/g, '-') : 'img'}-${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`;
-          const filePath = path.join(uploadDir, filename);
-          fs.writeFileSync(filePath, Buffer.from(data, 'base64'));
-          generatedUrls.push(getFileUrl(req, filename));
-        }
-      } else if (typeof item === 'string') {
-        generatedUrls.push(item);
+    const uploadResults: CloudinaryUploadResult[] = [];
+    for (const item of b64List) {
+      if (typeof item === 'string') {
+        const isVideo = item.startsWith('data:video/');
+        const result = await uploadBase64ToCloudinary(
+          item,
+          isVideo ? 'madhuvan_honey/videos' : 'madhuvan_honey/media',
+          isVideo ? 'video' : 'image'
+        );
+        uploadResults.push(result);
       }
     }
 
+    const urls = uploadResults.map((r) => r.optimizedUrl);
+
     res.status(200).json({
       success: true,
-      message: 'Base64 image(s) processed successfully',
-      url: generatedUrls[0],
-      urls: generatedUrls,
+      message: 'Base64 media processed and optimized successfully',
+      url: urls[0],
+      urls,
       data: {
-        urls: generatedUrls,
-        primaryUrl: generatedUrls[0],
+        urls,
+        primaryUrl: urls[0],
+        files: uploadResults,
       },
     });
   } catch (error: any) {
-    console.error('[Base64 Upload Error]:', error);
+    console.error('[Base64 Cloudinary Upload Error]:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to process base64 image',
+      message: error.message || 'Failed to process base64 media',
     });
   }
 });

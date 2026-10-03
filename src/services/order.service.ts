@@ -63,8 +63,8 @@ export class OrderService {
       const prodId = item.productId || item.product;
       const isObjectId = typeof prodId === 'string' && /^[0-9a-fA-F]{24}$/.test(prodId);
       let product = isObjectId ? await Product.findById(prodId) : null;
-      if (!product && item.slug) {
-        product = await Product.findOne({ slug: item.slug });
+      if (!product && (item as any).slug) {
+        product = await Product.findOne({ slug: (item as any).slug });
       }
       if (!product && (item.name || item.productName)) {
         product = await Product.findOne({ name: item.name || item.productName });
