@@ -29,7 +29,8 @@ export class CustomerService {
         .select('-password')
         .sort('-createdAt')
         .skip(skip)
-        .limit(limitNum),
+        .limit(limitNum)
+        .lean(),
       User.countDocuments(query),
     ]);
 
@@ -38,11 +39,14 @@ export class CustomerService {
       users.map(async (u) => {
         const orders = await Order.find({
           $or: [{ user: u._id }, { customerEmail: u.email }],
-        }).sort('-createdAt');
+        })
+          .select('total orderStatus createdAt')
+          .sort('-createdAt')
+          .lean();
 
         const totalOrders = orders.length;
         const totalSpent = orders.reduce((sum, o) => (o.orderStatus !== 'cancelled' ? sum + o.total : sum), 0);
-        const lastOrderDate = orders[0] ? orders[0].createdAt?.toISOString().split('T')[0] || null : null;
+        const lastOrderDate = orders[0] && orders[0].createdAt ? new Date(orders[0].createdAt).toISOString().split('T')[0] : null;
 
         return {
           id: u._id.toString(),

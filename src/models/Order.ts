@@ -212,6 +212,10 @@ const orderSchema = new Schema<IOrderDocument>(
 );
 
 orderSchema.index({ customerEmail: 1, customerPhone: 1, orderStatus: 1, createdAt: -1 });
+orderSchema.index({ createdAt: -1 });
+orderSchema.index({ paymentStatus: 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1, createdAt: -1 });
+orderSchema.index({ utrNumber: 1 });
 
 export const Order = model<IOrderDocument>('Order', orderSchema);
 export default Order;

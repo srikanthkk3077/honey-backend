@@ -23,28 +23,28 @@ const INITIAL_CATEGORIES = [
     name: 'Wild Forest Honey',
     slug: 'wild-forest-honey',
     description: 'Dark, enzyme-rich raw nectar collected from deep forest flora & untouched wild hives.',
-    image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
+    image: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
     productCount: 1,
   },
   {
     name: 'Single Flora Honey',
     slug: 'single-flora',
     description: 'Monofloral honey harvested during specific seasonal flower blooms across regional valleys.',
-    image: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80',
+    image: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042829/madhuvan_honey/categories/gwdrq76plaphazzz9n6n.jpg',
     productCount: 2,
   },
   {
     name: 'Ayurvedic & Herbal Infusions',
     slug: 'ayurvedic-infused',
     description: 'Raw honey slow-infused with potent Vedic herbs like Tulsi, Ginger, Cinnamon & Ashwagandha.',
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
+    image: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042830/madhuvan_honey/categories/yiqoyye6mldhvd3nhwnd.jpg',
     productCount: 1,
   },
   {
     name: 'Honeycomb & Gourmet',
     slug: 'honeycomb-gourmet',
     description: 'Pure chewable raw comb frames and naturally churned crystal cream honey spreads.',
-    image: 'https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=800&q=80',
+    image: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042831/madhuvan_honey/categories/ljhxi4krohpxcieqznos.jpg',
     productCount: 2,
   },
 ];
@@ -66,9 +66,9 @@ const INITIAL_PRODUCTS_DATA = [
     reviewsCount: 148,
     stock: 45,
     images: [
-      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=1000&q=80',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042826/madhuvan_honey/products/k2uixjenvf4dcvj69j3p.jpg',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042827/madhuvan_honey/products/sebdv5xkzd5k2f38kmoq.jpg',
     ],
     sizes: [
       { size: '250g', price: 349, originalPrice: 450, stock: 30, sku: 'MV-SND-250' },
@@ -129,8 +129,8 @@ const INITIAL_PRODUCTS_DATA = [
     reviewsCount: 112,
     stock: 38,
     images: [
-      'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=80',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042826/madhuvan_honey/products/k2uixjenvf4dcvj69j3p.jpg',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
     ],
     sizes: [
       { size: '250g', price: 420, originalPrice: 520, stock: 25, sku: 'MV-ACA-250' },
@@ -184,8 +184,8 @@ const INITIAL_PRODUCTS_DATA = [
     reviewsCount: 89,
     stock: 28,
     images: [
-      'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=80',
+      'https://res.cloudinary.com/kisnodzz/image/upload/f_auto,q_auto/v1/madhuvan_honey/media/8733d029f07377e468cb8e5092888a-1790994948272?_a=BAMAROhM0',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
     ],
     sizes: [
       { size: '250g', price: 320, originalPrice: 399, stock: 20, sku: 'MV-JAM-250' },
@@ -239,8 +239,8 @@ const INITIAL_PRODUCTS_DATA = [
     reviewsCount: 164,
     stock: 50,
     images: [
-      'https://images.unsplash.com/photo-1546554137-f86b9593a222?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=80',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042838/madhuvan_honey/blog/voq7qls5nx0vnhteluka.jpg',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
     ],
     sizes: [
       { size: '250g', price: 380, originalPrice: 480, stock: 25, sku: 'MV-TLS-250' },
@@ -294,8 +294,8 @@ const INITIAL_PRODUCTS_DATA = [
     reviewsCount: 76,
     stock: 22,
     images: [
-      'https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1000&q=80',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042827/madhuvan_honey/products/sebdv5xkzd5k2f38kmoq.jpg',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042826/madhuvan_honey/products/k2uixjenvf4dcvj69j3p.jpg',
     ],
     sizes: [
       { size: '350g Comb', price: 899, originalPrice: 1199, stock: 22, sku: 'MV-CMB-350' },
@@ -347,8 +347,8 @@ const INITIAL_PRODUCTS_DATA = [
     reviewsCount: 63,
     stock: 35,
     images: [
-      'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=1000&q=80',
-      'https://images.unsplash.com/photo-1546554137-f86b9593a222?auto=format&fit=crop&w=1000&q=80',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
+      'https://res.cloudinary.com/kisnodzz/image/upload/v1791042838/madhuvan_honey/blog/voq7qls5nx0vnhteluka.jpg',
     ],
     sizes: [
       { size: '250g', price: 280, originalPrice: 350, stock: 25, sku: 'MV-MST-250' },
@@ -393,8 +393,8 @@ const INITIAL_VIDEOS = [
     title: 'Extracting Golden Amber Nectar from Sundarbans Wild Comb',
     description:
       'Watch how tribal Mowals ethically harvest giant wild Apis dorsata honeycombs deep in the Sundarbans mangrove reserves without harming the bee colony.',
-    videoUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/61/Slow_Motion_Bee_Flight_-_Close-up_video_of_honey_bees.webm',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
+    videoUrl: 'https://res.cloudinary.com/kisnodzz/video/upload/f_auto,q_auto/v1/madhuvan_honey/videos/WhatsApp-Video-2026-10-02-at-1-1790995078981.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042814/madhuvan_honey/products/t6l1edtfc4xg0wmxb8we.jpg',
     category: 'harvest',
     duration: '1:15',
     taggedProductName: 'Madhuvan Sundarbans Wild Forest Honey',
@@ -406,8 +406,8 @@ const INITIAL_VIDEOS = [
     title: 'Nomadic Kashmiri Beekeeping in Robinia Acacia Valleys',
     description:
       'Journey to 6,500 ft altitude in Jammu & Kashmir as our beekeepers follow the pristine white acacia blossom migration across the Pir Panjal ranges.',
-    videoUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Bee_in_ultra_slow_motion.webm',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80',
+    videoUrl: 'https://res.cloudinary.com/kisnodzz/video/upload/f_auto,q_auto/v1/madhuvan_honey/videos/WhatsApp-Video-2026-10-02-at-1-1791020235595.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042829/madhuvan_honey/categories/gwdrq76plaphazzz9n6n.jpg',
     category: 'story',
     duration: '1:45',
     taggedProductName: 'Madhuvan Kashmir Valley Acacia Honey',
@@ -419,8 +419,8 @@ const INITIAL_VIDEOS = [
     title: 'How to Do the Cold Water Purity Test at Home',
     description:
       'See the exact difference between 100% pure raw unheated honey and adulterated commercial corn syrup in a single glass of water.',
-    videoUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Honey_bee_gathering_pollen.webm',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=800&q=80',
+    videoUrl: 'https://res.cloudinary.com/kisnodzz/video/upload/f_auto,q_auto/v1/madhuvan_honey/videos/WhatsApp-Video-2026-10-02-at-1-1791020416024.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042831/madhuvan_honey/categories/ljhxi4krohpxcieqznos.jpg',
     category: 'purity',
     duration: '0:50',
     taggedProductName: 'Madhuvan Sundarbans Wild Forest Honey',
@@ -432,8 +432,8 @@ const INITIAL_VIDEOS = [
     title: 'Centrifugal Cold Extraction in Artisanal Wooden Apiaries',
     description:
       'Experience hygienic extraction at 28°C cold filtration, retaining 100% of live natural enzymes, bee pollen, and propolis in every bottle.',
-    videoUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/63/20240728_honey_bee_hive_wood_parcel_wm.webm',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1546554137-f86b9593a222?auto=format&fit=crop&w=800&q=80',
+    videoUrl: 'https://res.cloudinary.com/kisnodzz/video/upload/f_auto,q_auto/v1/madhuvan_honey/videos/WhatsApp-Video-2026-10-02-at-1-1790995036461.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042838/madhuvan_honey/blog/voq7qls5nx0vnhteluka.jpg',
     category: 'harvest',
     duration: '1:30',
     taggedProductName: 'Madhuvan Sundarbans Wild Forest Honey',
@@ -445,8 +445,8 @@ const INITIAL_VIDEOS = [
     title: 'Ayurvedic Holy Tulsi Honey Decoction for Seasonal Immunity',
     description:
       'Master beekeeper and herbalist Vaidya Joshi demonstrates brewing lukewarm Tulsi raw honey tea to soothe chest congestion and boost immunity.',
-    videoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Western_honey_bee_%28Apis_mellifera%29.webm',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?auto=format&fit=crop&w=800&q=80',
+    videoUrl: 'https://res.cloudinary.com/kisnodzz/video/upload/f_auto,q_auto/v1/madhuvan_honey/videos/WhatsApp-Video-2026-10-02-at-1-1791002118056.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/kisnodzz/image/upload/v1791042841/madhuvan_honey/blog/ax7eoncr3jf3cxwmvcne.jpg',
     category: 'recipe',
     duration: '2:10',
     taggedProductName: 'Madhuvan Vedic Holy Tulsi Infused Raw Honey',

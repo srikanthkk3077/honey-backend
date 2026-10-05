@@ -201,7 +201,10 @@ export class OrderService {
         { trackingNumber: new RegExp(`^${clean}$`, 'i') },
         { customerPhone: clean },
       ],
-    }).sort('-createdAt');
+    })
+      .select('-paymentScreenshot')
+      .sort('-createdAt')
+      .lean();
 
     if (!order) {
       throw new Error(`No consignment found matching "${query}"`);
@@ -217,9 +220,11 @@ export class OrderService {
 
     const [orders, total] = await Promise.all([
       Order.find({ user: userId })
+        .select('-paymentScreenshot')
         .sort('-createdAt')
         .skip(skip)
-        .limit(limitNum),
+        .limit(limitNum)
+        .lean(),
       Order.countDocuments({ user: userId }),
     ]);
 
@@ -263,10 +268,12 @@ export class OrderService {
 
     const [orders, total] = await Promise.all([
       Order.find(query)
+        .select('-paymentScreenshot')
         .populate('user', 'name email phone')
         .sort('-createdAt')
         .skip(skip)
-        .limit(limitNum),
+        .limit(limitNum)
+        .lean(),
       Order.countDocuments(query),
     ]);
 
