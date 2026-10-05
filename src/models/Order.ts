@@ -57,6 +57,9 @@ const shippingAddressSchema = new Schema(
     postalCode: { type: String, trim: true, default: '' },
     country: { type: String, default: 'India', trim: true },
     notes: { type: String, trim: true, default: '' },
+    googleMapsLink: { type: String, trim: true, default: '' },
+    latitude: { type: Number },
+    longitude: { type: Number },
   },
   { _id: false }
 );

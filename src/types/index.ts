@@ -148,6 +148,9 @@ export interface IShippingAddress {
   postalCode?: string; // backwards compatibility
   country: string;
   notes?: string;
+  googleMapsLink?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface IOrderItem {
