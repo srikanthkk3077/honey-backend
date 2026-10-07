@@ -1,4 +1,4 @@
-﻿import { Document, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { Request } from 'express';
 
 // User & Auth Types
@@ -254,7 +254,52 @@ export interface IPaymentConfig {
   isCodActive?: boolean;
 }
 
+export interface IHeroBadge {
+  id: string;
+  label: string;
+  icon: string;
+  isActive: boolean;
+}
+
+export interface IHeroBannerSlide {
+  id: string;
+  imageUrl: string;
+  titleLine1?: string;
+  titleLine2?: string;
+  subtitle?: string;
+  eyebrow?: string;
+  primaryCtaText?: string;
+  primaryCtaLink?: string;
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
+  backgroundColor?: string;
+  isActive?: boolean;
+  order?: number;
+}
+
+export interface IHeroConfig {
+  eyebrow?: string;
+  titleLine1?: string;
+  titleLine2?: string;
+  subtitle?: string;
+  primaryCtaText?: string;
+  primaryCtaLink?: string;
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
+  storyVideoUrl?: string;
+  heroImageUrl?: string;
+  calloutBadgeText?: string;
+  showCalloutBadge?: boolean;
+  trustBadges?: IHeroBadge[];
+  showBotanicalAccent?: boolean;
+  backgroundColor?: string;
+  isActive?: boolean;
+  heroBannerSlides?: IHeroBannerSlide[];
+  heroDisplayMode?: 'hero' | 'carousel';
+}
+
 export interface IStoreSettings {
+  heroConfig?: IHeroConfig;
   paymentConfig?: IPaymentConfig;
   storeName: string;
   brandTagline: string;

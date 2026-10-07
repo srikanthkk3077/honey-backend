@@ -35,6 +35,30 @@ export class SettingsService {
       return settings;
     }
 
+    if (data.heroConfig) {
+      const existingHero = (settings.heroConfig && typeof (settings.heroConfig as any).toObject === 'function')
+        ? (settings.heroConfig as any).toObject()
+        : (settings.heroConfig || {});
+      settings.heroConfig = {
+        ...existingHero,
+        ...data.heroConfig,
+      };
+      settings.markModified('heroConfig');
+      delete (data as any).heroConfig;
+    }
+
+    if (data.paymentConfig) {
+      const existingPayment = (settings.paymentConfig && typeof (settings.paymentConfig as any).toObject === 'function')
+        ? (settings.paymentConfig as any).toObject()
+        : (settings.paymentConfig || {});
+      settings.paymentConfig = {
+        ...existingPayment,
+        ...data.paymentConfig,
+      };
+      settings.markModified('paymentConfig');
+      delete (data as any).paymentConfig;
+    }
+
     Object.assign(settings, data);
     await settings.save();
     return settings;

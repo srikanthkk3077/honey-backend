@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+﻿import { Schema, model } from 'mongoose';
 import { IProductDocument } from '../types';
 
 const productSizeOptionSchema = new Schema(
@@ -228,7 +228,14 @@ productSchema.pre('save', function () {
   }
 });
 
+// Compound indexes for fast queries
+productSchema.index({ isActive: 1, createdAt: -1 });
+productSchema.index({ isActive: 1, category: 1 });
+productSchema.index({ isActive: 1, isFeatured: 1 });
+productSchema.index({ isActive: 1, isBestSeller: 1 });
+productSchema.index({ slug: 1 }, { unique: true, sparse: true });
 productSchema.index({ name: 'text', description: 'text', tagline: 'text', origin: 'text' });
 
 export const Product = model<IProductDocument>('Product', productSchema);
 export default Product;
+
