@@ -98,6 +98,7 @@ export interface INutritionFacts {
 export interface IProduct {
   name: string;
   slug: string;
+  badge?: string;
   tagline?: string;
   description: string;
   story?: string;
@@ -298,7 +299,44 @@ export interface IHeroConfig {
   heroDisplayMode?: 'hero' | 'carousel';
 }
 
+
+// Shop Page Configuration
+export interface IShopTrustBadge {
+  title: string;
+  subtitle: string;
+  icon?: string;
+}
+
+export interface IShopSidebarPromo {
+  title: string;
+  buttonText: string;
+  linkUrl: string;
+  imageUrl: string;
+  isActive: boolean;
+}
+
+export interface IShopBottomTrustItem {
+  title: string;
+  subtitle: string;
+  icon?: string;
+}
+
+export interface IShopConfig {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  heroGraphicUrl: string;
+  heroBackgroundImageUrl?: string;
+  heroBannerMode?: 'dynamic' | 'static';
+  heroBgPosition?: 'right' | 'center' | 'left';
+  heroScriptText?: string;
+  trustBadges: IShopTrustBadge[];
+  sidebarPromo: IShopSidebarPromo;
+  bottomTrustItems: IShopBottomTrustItem[];
+}
+
 export interface IStoreSettings {
+  shopConfig?: IShopConfig;
   heroConfig?: IHeroConfig;
   paymentConfig?: IPaymentConfig;
   storeName: string;

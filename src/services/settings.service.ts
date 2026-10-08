@@ -47,6 +47,19 @@ export class SettingsService {
       delete (data as any).heroConfig;
     }
 
+    
+    if (data.shopConfig) {
+      const existingShop = (settings.shopConfig && typeof (settings.shopConfig as any).toObject === 'function')
+        ? (settings.shopConfig as any).toObject()
+        : (settings.shopConfig || {});
+      settings.shopConfig = {
+        ...existingShop,
+        ...data.shopConfig,
+      };
+      settings.markModified('shopConfig');
+      delete (data as any).shopConfig;
+    }
+
     if (data.paymentConfig) {
       const existingPayment = (settings.paymentConfig && typeof (settings.paymentConfig as any).toObject === 'function')
         ? (settings.paymentConfig as any).toObject()

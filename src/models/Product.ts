@@ -68,6 +68,11 @@ const productSchema = new Schema<IProductDocument>(
       trim: true,
       default: '',
     },
+    badge: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     description: {
       type: String,
       required: [true, 'Product description is required'],
@@ -217,7 +222,7 @@ const productSchema = new Schema<IProductDocument>(
   }
 );
 
-productSchema.pre('save', function () {
+productSchema.pre('save', function (this: any) {
   // Synchronize stock and stockQuantity
   if (this.stock !== undefined && this.stockQuantity !== this.stock) {
     this.stockQuantity = this.stock;

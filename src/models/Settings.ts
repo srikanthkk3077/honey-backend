@@ -140,6 +140,77 @@ const settingsSchema = new Schema<IStoreSettingsDocument>(
         default: 'hero',
       },
     },
+    
+    shopConfig: {
+      eyebrow: { type: String, default: 'PURE • NATURAL • RAW', trim: true },
+      title: { type: String, default: 'Our Honey Collection', trim: true },
+      subtitle: {
+        type: String,
+        default: "Nature's finest. Straight from the forest to your home.",
+        trim: true,
+      },
+      heroGraphicUrl: {
+        type: String,
+        default: '/images/shop/shop_hero_bg_jar_forest.jpg',
+        trim: true,
+      },
+      heroBackgroundImageUrl: {
+        type: String,
+        default: '/images/shop/shop_hero_bg_jar_forest.jpg',
+        trim: true,
+      },
+      heroBannerMode: {
+        type: String,
+        enum: ['dynamic', 'static'],
+        default: 'dynamic',
+      },
+      heroBgPosition: {
+        type: String,
+        enum: ['right', 'center', 'left'],
+        default: 'right',
+      },
+      heroScriptText: {
+        type: String,
+        default: 'Pure Honey Pure Life',
+        trim: true,
+      },
+      trustBadges: {
+        type: [
+          {
+            title: { type: String, default: '' },
+            subtitle: { type: String, default: '' },
+            icon: { type: String, default: '' },
+          },
+        ],
+        default: [
+          { title: '100% Natural', subtitle: 'No Additives', icon: 'leaf' },
+          { title: 'Lab Tested', subtitle: 'for Purity', icon: 'shield' },
+          { title: 'Supports', subtitle: 'Immunity', icon: 'bee' },
+        ],
+      },
+      sidebarPromo: {
+        title: { type: String, default: 'Pure Honey Better Health', trim: true },
+        buttonText: { type: String, default: 'Learn More →', trim: true },
+        linkUrl: { type: String, default: '/about', trim: true },
+        imageUrl: { type: String, default: '/images/shop/sidebar_promo.png', trim: true },
+        isActive: { type: Boolean, default: true },
+      },
+      bottomTrustItems: {
+        type: [
+          {
+            title: { type: String, default: '' },
+            subtitle: { type: String, default: '' },
+            icon: { type: String, default: '' },
+          },
+        ],
+        default: [
+          { title: '100% Natural', subtitle: 'No Preservatives', icon: 'leaf' },
+          { title: 'Lab Tested', subtitle: 'for Purity', icon: 'flask' },
+          { title: 'Fast & Safe', subtitle: 'Delivery', icon: 'truck' },
+          { title: 'Trusted by', subtitle: 'Thousands of Families', icon: 'shield' },
+        ],
+      },
+    },
     paymentConfig: {
       upiId: { type: String, default: 'madhuvanhoney@upi', trim: true },
       upiQrCode: { type: String, default: '', trim: true },
