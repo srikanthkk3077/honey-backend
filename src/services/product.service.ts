@@ -117,7 +117,13 @@ export class ProductService {
   }
 
   async getProductById(id: string) {
-    const product = await Product.findById(id).populate('category', 'name slug description image');
+    let product: any = null;
+    if (id && id.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(id).populate('category', 'name slug description image');
+    }
+    if (!product && id) {
+      product = await Product.findOne({ slug: id.toLowerCase() }).populate('category', 'name slug description image');
+    }
     if (!product) {
       throw new Error('Product not found');
     }
@@ -133,7 +139,13 @@ export class ProductService {
   }
 
   async getRelatedProducts(productId: string, limit = 4) {
-    const current = await Product.findById(productId);
+    let current: any = null;
+    if (productId && productId.match(/^[0-9a-fA-F]{24}$/)) {
+      current = await Product.findById(productId);
+    }
+    if (!current && productId) {
+      current = await Product.findOne({ slug: productId.toLowerCase() });
+    }
     if (!current) return [];
 
     const related = await Product.find({
@@ -275,8 +287,18 @@ export class ProductService {
     rating: number;
     comment: string;
     verified?: boolean;
+    userRole?: string;
+    location?: string;
+    avatar?: string;
+    showOnHome?: boolean;
   }) {
-    const product = await Product.findById(productId);
+    let product: any = null;
+    if (productId && productId.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(productId);
+    }
+    if (!product && productId) {
+      product = await Product.findOne({ slug: productId.toLowerCase() });
+    }
     if (!product) {
       throw new Error('Product not found');
     }
@@ -288,17 +310,17 @@ export class ProductService {
       comment: reviewData.comment,
       date: new Date().toISOString().split('T')[0],
       verified: reviewData.verified ?? false,
-      showOnHome: (reviewData as any).showOnHome ?? false,
-      userRole: (reviewData as any).userRole || 'Verified Patron',
-      location: (reviewData as any).location || 'Verified Buyer',
-      avatar: (reviewData as any).avatar || '',
+      showOnHome: reviewData.showOnHome ?? false,
+      userRole: reviewData.userRole || 'Verified Patron',
+      location: reviewData.location || 'Verified Buyer',
+      avatar: reviewData.avatar || '',
     };
 
     product.reviews.push(newReview as any);
     product.reviewsCount = product.reviews.length;
 
     // Recalculate average rating
-    const totalScore = product.reviews.reduce((acc, r) => acc + r.rating, 0);
+    const totalScore = product.reviews.reduce((acc: number, r: any) => acc + (r.rating || 0), 0);
     product.rating = Number((totalScore / product.reviews.length).toFixed(1));
 
     await product.save();
@@ -306,7 +328,13 @@ export class ProductService {
   }
 
   async deleteReview(productId: string, reviewId: string) {
-    const product = await Product.findById(productId);
+    let product: any = null;
+    if (productId && productId.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(productId);
+    }
+    if (!product && productId) {
+      product = await Product.findOne({ slug: productId.toLowerCase() });
+    }
     if (!product) {
       throw new Error('Product not found');
     }
@@ -317,7 +345,7 @@ export class ProductService {
     product.reviewsCount = product.reviews.length;
 
     if (product.reviews.length > 0) {
-      const totalScore = product.reviews.reduce((acc, r) => acc + r.rating, 0);
+      const totalScore = product.reviews.reduce((acc: number, r: any) => acc + (r.rating || 0), 0);
       product.rating = Number((totalScore / product.reviews.length).toFixed(1));
     } else {
       product.rating = 5.0;
@@ -391,7 +419,13 @@ export class ProductService {
   }
 
   async toggleReviewHome(productId: string, reviewId: string, showOnHome?: boolean) {
-    const product = await Product.findById(productId);
+    let product: any = null;
+    if (productId && productId.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(productId);
+    }
+    if (!product && productId) {
+      product = await Product.findOne({ slug: productId.toLowerCase() });
+    }
     if (!product) {
       throw new Error('Product not found');
     }

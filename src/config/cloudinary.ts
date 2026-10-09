@@ -139,6 +139,25 @@ export const uploadBase64ToCloudinary = async (
   folder: string = 'madhuvan_honey',
   resourceType: 'image' | 'video' | 'auto' = 'auto'
 ): Promise<CloudinaryUploadResult> => {
+  // If base64 data URL, decode to Buffer and stream directly to prevent decoding/timeout errors
+  if (base64OrUrl.startsWith('data:')) {
+    const commaIndex = base64OrUrl.indexOf(',');
+    if (commaIndex !== -1) {
+      const header = base64OrUrl.slice(0, commaIndex);
+      const rawData = base64OrUrl.slice(commaIndex + 1).replace(/\s+/g, '');
+      const isVideo = header.includes('video/');
+      const effectiveType: 'image' | 'video' = isVideo ? 'video' : 'image';
+      
+      const buffer = Buffer.from(rawData, 'base64');
+      if (buffer.length < 32) {
+        throw new Error('Image data is corrupted or incomplete (data too small to be a valid image). Please re-select the image.');
+      }
+
+      const fileName = 'upload-' + Date.now();
+      return uploadBufferToCloudinary(buffer, folder, effectiveType, fileName);
+    }
+  }
+
   const result: UploadApiResponse = await cloudinary.uploader.upload(base64OrUrl, {
     folder,
     resource_type: resourceType,

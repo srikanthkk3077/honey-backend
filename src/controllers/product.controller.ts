@@ -119,13 +119,13 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
 export const addReview = async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
   try {
     const productId = req.params.id as string;
-    const { userName, rating, comment } = req.body;
+    const { userName, rating, comment, location, userRole, avatar } = req.body;
 
     if (!rating || !comment) {
       return sendError(res, 'Rating and comment are required', 400);
     }
 
-    const name = userName || req.user?.name || 'Verified Beekeeper';
+    const name = userName || req.user?.name || 'Verified Patron';
     const userId = req.user?.id;
 
     const product = await productService.addReview(productId, {
@@ -134,6 +134,9 @@ export const addReview = async (req: AuthRequest, res: Response, next: NextFunct
       rating: Number(rating),
       comment: comment.trim(),
       verified: !!userId,
+      location: location?.trim() || 'Verified Buyer',
+      userRole: userRole?.trim() || 'Verified Patron',
+      avatar: avatar?.trim() || '',
     });
 
     return sendSuccess(res, 'Review added successfully', product);

@@ -211,10 +211,11 @@ router.post('/base64', async (req: Request, res: Response): Promise<void> => {
       },
     });
   } catch (error: any) {
-    console.error('[Base64 Cloudinary Upload Error]:', error);
+    console.error('[Base64 Cloudinary Upload Error]:', error?.message || error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to process base64 media',
+      message: error?.message || (typeof error === 'string' ? error : JSON.stringify(error)) || 'Failed to process base64 media',
+      detail: error?.message || String(error),
     });
   }
 });

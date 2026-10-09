@@ -1,4 +1,4 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import { requireAdmin } from '../middleware/admin.middleware';
 
@@ -9,6 +9,10 @@ import {
   deleteProduct,
   getProducts,
   getProductById,
+  getAllReviews,
+  getHomeReviews,
+  deleteReview,
+  toggleReviewHome,
 } from '../controllers/product.controller';
 import {
   createCategory,
@@ -43,6 +47,13 @@ import {
   updateInquiryStatus,
   getAllSubscribers,
 } from '../controllers/contact.controller';
+import {
+  getSliders,
+  getSliderById,
+  createSlider,
+  updateSlider,
+  deleteSlider,
+} from '../controllers/slider.controller';
 
 const router = Router();
 
@@ -54,11 +65,17 @@ router.get('/dashboard/stats', getDashboardStats);
 router.get('/dashboard', getDashboardStats);
 
 // Products
+router.get('/products/reviews/all', getAllReviews);
+router.get('/products/reviews/home', getHomeReviews);
 router.get('/products', getProducts);
 router.get('/products/:id', getProductById);
 router.post('/products', createProduct);
 router.put('/products/:id', updateProduct);
 router.delete('/products/:id', deleteProduct);
+
+// Reviews Management
+router.delete('/products/:id/reviews/:reviewId', deleteReview);
+router.patch('/products/:id/reviews/:reviewId/toggle-home', toggleReviewHome);
 
 // Categories
 router.get('/categories', getAllCategories);
@@ -86,6 +103,13 @@ router.get('/videos/:id', getVideoById);
 router.post('/videos', createVideo);
 router.put('/videos/:id', updateVideo);
 router.delete('/videos/:id', deleteVideo);
+
+// Sliders
+router.get('/sliders', getSliders);
+router.get('/sliders/:id', getSliderById);
+router.post('/sliders', createSlider);
+router.put('/sliders/:id', updateSlider);
+router.delete('/sliders/:id', deleteSlider);
 
 // Settings
 router.get('/settings', getSettings);
