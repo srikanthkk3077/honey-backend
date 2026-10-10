@@ -89,6 +89,11 @@ const settingsSchema = new Schema<IStoreSettingsDocument>(
         default: '/images/brand/hero_illustration_feathered.png',
         trim: true,
       },
+      heroMobileImageUrl: {
+        type: String,
+        default: '',
+        trim: true,
+      },
       calloutBadgeText: {
         type: String,
         default: 'Pure Honey\nStronger Communities',
@@ -119,6 +124,7 @@ const settingsSchema = new Schema<IStoreSettingsDocument>(
           {
             id: { type: String, default: '' },
             imageUrl: { type: String, default: '' },
+            mobileImageUrl: { type: String, default: '' },
             titleLine1: { type: String, default: '' },
             titleLine2: { type: String, default: '' },
             subtitle: { type: String, default: '' },

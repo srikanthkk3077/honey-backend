@@ -266,6 +266,7 @@ export interface IHeroBadge {
 export interface IHeroBannerSlide {
   id: string;
   imageUrl: string;
+  mobileImageUrl?: string;
   titleLine1?: string;
   titleLine2?: string;
   subtitle?: string;
@@ -290,6 +291,7 @@ export interface IHeroConfig {
   secondaryCtaLink?: string;
   storyVideoUrl?: string;
   heroImageUrl?: string;
+  heroMobileImageUrl?: string;
   calloutBadgeText?: string;
   showCalloutBadge?: boolean;
   trustBadges?: IHeroBadge[];
@@ -445,6 +447,7 @@ export interface ISlider {
   subtitle?: string;
   badge?: string;
   imageUrl: string;
+  mobileImageUrl?: string;
   videoUrl?: string;
   mediaType: 'image' | 'video';
   linkUrl: string;

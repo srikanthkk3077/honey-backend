@@ -23,6 +23,11 @@ const sliderSchema = new Schema<ISliderDocument>(
       required: [true, 'Slider image or poster URL is required'],
       trim: true,
     },
+    mobileImageUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     videoUrl: {
       type: String,
       trim: true,
