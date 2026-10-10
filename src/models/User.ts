@@ -40,6 +40,9 @@ const userSchema = new Schema<IUserDocument>(
     },
     address: {
       street: { type: String, trim: true, default: '' },
+      addressLine1: { type: String, trim: true, default: '' },
+      addressLine2: { type: String, trim: true, default: '' },
+      landmark: { type: String, trim: true, default: '' },
       city: { type: String, trim: true, default: '' },
       state: { type: String, trim: true, default: '' },
       pincode: { type: String, trim: true, default: '' },
