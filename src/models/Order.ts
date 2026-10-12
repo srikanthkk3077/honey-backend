@@ -1,4 +1,4 @@
-﻿import { Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IOrderDocument } from '../types';
 
 const orderItemSchema = new Schema(
@@ -110,6 +110,16 @@ const orderSchema = new Schema<IOrderDocument>(
       min: 0,
     },
     discount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    couponCode: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    couponDiscount: {
       type: Number,
       default: 0,
       min: 0,

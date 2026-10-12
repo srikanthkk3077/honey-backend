@@ -1,4 +1,4 @@
-﻿import { Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import orderService from '../services/order.service';
 import paymentService from '../services/payment.service';
 import { AuthRequest } from '../types';
@@ -17,6 +17,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       customerPhone,
       utrNumber,
       paymentScreenshot,
+      couponCode,
+      couponDiscount,
     } = req.body;
 
     const rawItems = items || orderItems;
@@ -36,6 +38,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       notes,
       utrNumber,
       paymentScreenshot,
+      couponCode,
+      couponDiscount,
     });
 
     return sendSuccess(res, 'Order placed successfully', order, 201);

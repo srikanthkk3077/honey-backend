@@ -18,6 +18,7 @@ import contactRoutes from './routes/contact.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import adminRoutes from './routes/admin.routes';
 import uploadRoutes from './routes/upload.routes';
+import couponRoutes from './routes/coupon.routes';
 
 import { notFound, errorHandler } from './middleware/error.middleware';
 
@@ -27,7 +28,6 @@ const app: Application = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests from all origins in dev or matching client
       callback(null, true);
     },
     credentials: true,
@@ -92,6 +92,7 @@ const registerRoutes = (prefix: string) => {
   app.use(`${prefix}/newsletter`, contactRoutes);
   app.use(`${prefix}/dashboard`, dashboardRoutes);
   app.use(`${prefix}/admin`, adminRoutes);
+  app.use(`${prefix}/coupons`, couponRoutes);
 };
 
 // Mount for both standard /api and versioned /api/v1
@@ -103,4 +104,3 @@ app.use(notFound);
 app.use(errorHandler);
 
 export default app;
-

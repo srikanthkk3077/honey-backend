@@ -1,6 +1,7 @@
 import Order from '../models/Order';
 import Product from '../models/Product';
 import Settings from '../models/Settings';
+import Coupon from '../models/Coupon';
 import { IOrderItem, IShippingAddress, OrderStatus, PaymentMethod } from '../types';
 
 export interface CreateOrderInput {
@@ -32,6 +33,8 @@ export interface CreateOrderInput {
   notes?: string;
   utrNumber?: string;
   paymentScreenshot?: string;
+  couponCode?: string;
+  couponDiscount?: number;
 }
 
 export class OrderService {
@@ -118,7 +121,9 @@ export class OrderService {
 
     const shippingFee = subtotal >= freeShippingThreshold || subtotal === 0 ? 0 : standardShippingFee;
     const taxPrice = Math.round(subtotal * 0.05 * 100) / 100;
-    const total = subtotal + shippingFee;
+    const couponDiscount = Math.max(0, Number(input.couponDiscount) || 0);
+    const couponCode = input.couponCode ? String(input.couponCode).toUpperCase().trim() : '';
+    const total = Math.max(0, Math.round((subtotal + shippingFee - couponDiscount) * 100) / 100);
 
     // Generate unique order number
     let orderNumber = `MDH-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -143,7 +148,9 @@ export class OrderService {
       },
       items: populatedItems,
       subtotal,
-      discount,
+      discount: discount + couponDiscount,
+      couponCode,
+      couponDiscount,
       shippingFee,
       taxPrice,
       total,
@@ -162,6 +169,14 @@ export class OrderService {
     }
 
     const order = await Order.create(orderData);
+
+    if (couponCode) {
+      try {
+        await Coupon.findOneAndUpdate({ code: couponCode }, { $inc: { usedCount: 1 } });
+      } catch (err) {
+        console.error('Failed to increment coupon usedCount:', err);
+      }
+    }
 
     return order;
   }

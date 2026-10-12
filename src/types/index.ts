@@ -191,6 +191,8 @@ export interface IOrder {
   discount: number;
   shippingFee: number;
   taxPrice?: number;
+  couponCode?: string;
+  couponDiscount?: number;
   total: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
