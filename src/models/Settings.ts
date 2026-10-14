@@ -235,6 +235,36 @@ const settingsSchema = new Schema<IStoreSettingsDocument>(
       isBankTransferActive: { type: Boolean, default: true },
       isCodActive: { type: Boolean, default: true },
     },
+
+    deliveryConfig: {
+      serviceabilityMode: {
+        type: String,
+        enum: ['all_india', 'restricted_pincodes'],
+        default: 'all_india',
+      },
+      defaultDeliveryDays: {
+        type: String,
+        default: '2-4 business days',
+      },
+      codAvailableDefault: {
+        type: Boolean,
+        default: false,
+      },
+      serviceablePincodes: {
+        type: [
+          {
+            pincode: { type: String, required: true },
+            city: { type: String, default: '' },
+            state: { type: String, default: '' },
+            deliveryDays: { type: String, default: '2-3 business days' },
+            isCodAvailable: { type: Boolean, default: true },
+            isActive: { type: Boolean, default: true },
+            notes: { type: String, default: '' },
+          },
+        ],
+        default: [],
+      },
+    },
   },
   {
     timestamps: true,

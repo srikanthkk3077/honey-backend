@@ -243,6 +243,23 @@ export interface IVideoItemDocument extends IVideoItem, Document {
 
 // Store Settings Types matching madhuvan_honey frontend
 
+export interface IDeliveryZone {
+  pincode: string;
+  city: string;
+  state: string;
+  deliveryDays: string;
+  isCodAvailable: boolean;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface IDeliveryConfig {
+  serviceabilityMode: 'all_india' | 'restricted_pincodes';
+  defaultDeliveryDays?: string;
+  codAvailableDefault?: boolean;
+  serviceablePincodes?: IDeliveryZone[];
+}
+
 export interface IPaymentConfig {
   upiId?: string;
   upiQrCode?: string;
@@ -344,6 +361,7 @@ export interface IStoreSettings {
   shopConfig?: IShopConfig;
   heroConfig?: IHeroConfig;
   paymentConfig?: IPaymentConfig;
+  deliveryConfig?: IDeliveryConfig;
   storeName: string;
   brandTagline: string;
   phone: string;

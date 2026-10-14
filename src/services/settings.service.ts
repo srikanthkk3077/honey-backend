@@ -60,6 +60,18 @@ export class SettingsService {
       delete (data as any).shopConfig;
     }
 
+if (data.deliveryConfig) {
+      const existingDelivery = (settings.deliveryConfig && typeof (settings.deliveryConfig as any).toObject === 'function')
+        ? (settings.deliveryConfig as any).toObject()
+        : (settings.deliveryConfig || {});
+      settings.deliveryConfig = {
+        ...existingDelivery,
+        ...data.deliveryConfig,
+      };
+      settings.markModified('deliveryConfig');
+      delete (data as any).deliveryConfig;
+    }
+
     if (data.paymentConfig) {
       const existingPayment = (settings.paymentConfig && typeof (settings.paymentConfig as any).toObject === 'function')
         ? (settings.paymentConfig as any).toObject()
