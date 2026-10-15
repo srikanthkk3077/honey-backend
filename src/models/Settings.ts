@@ -234,6 +234,24 @@ const settingsSchema = new Schema<IStoreSettingsDocument>(
       isUpiActive: { type: Boolean, default: true },
       isBankTransferActive: { type: Boolean, default: true },
       isCodActive: { type: Boolean, default: true },
+      isPhonePeActive: { type: Boolean, default: true },
+      isGooglePayActive: { type: Boolean, default: true },
+      upiMethods: {
+        type: [
+          {
+            id: { type: String, default: '' },
+            type: { type: String, default: 'phonepe' },
+            label: { type: String, default: '' },
+            upiId: { type: String, default: '' },
+            isActive: { type: Boolean, default: true },
+            deepLinkScheme: { type: String, default: '' },
+            brandColor: { type: String, default: '' },
+            iconLetter: { type: String, default: '' },
+            iconImage: { type: String, default: '' },
+          },
+        ],
+        default: [],
+      },
     },
 
     deliveryConfig: {

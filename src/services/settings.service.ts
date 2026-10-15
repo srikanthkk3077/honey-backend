@@ -80,6 +80,9 @@ if (data.deliveryConfig) {
         ...existingPayment,
         ...data.paymentConfig,
       };
+      if (Array.isArray(data.paymentConfig.upiMethods)) {
+        (settings.paymentConfig as any).upiMethods = data.paymentConfig.upiMethods;
+      }
       settings.markModified('paymentConfig');
       delete (data as any).paymentConfig;
     }

@@ -260,6 +260,20 @@ export interface IDeliveryConfig {
   serviceablePincodes?: IDeliveryZone[];
 }
 
+export type UpiMethodType = 'phonepe' | 'googlepay' | 'paytm' | 'bhim' | 'generic_upi' | 'custom' | string;
+
+export interface IUpiPaymentMethod {
+  id: string;
+  type: UpiMethodType;
+  label: string;
+  upiId: string;
+  isActive: boolean;
+  deepLinkScheme?: string;
+  brandColor?: string;
+  iconLetter?: string;
+  iconImage?: string;
+}
+
 export interface IPaymentConfig {
   upiId?: string;
   upiQrCode?: string;
@@ -273,6 +287,9 @@ export interface IPaymentConfig {
   isUpiActive?: boolean;
   isBankTransferActive?: boolean;
   isCodActive?: boolean;
+  isPhonePeActive?: boolean;
+  isGooglePayActive?: boolean;
+  upiMethods?: IUpiPaymentMethod[];
 }
 
 export interface IHeroBadge {
